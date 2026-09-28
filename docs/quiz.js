@@ -56,7 +56,15 @@
     sc.append(" · 전체 " + qs.length + "문제");
 
     var dots = $("dots"); dots.textContent = "";
-    qs.forEach(function (x, i) {
+    var n = qs.length, show = {}, last = -1;
+    [0, 1, state.idx, n - 2, n - 1].forEach(function (i) { if (i >= 0 && i < n) show[i] = true; });
+    Object.keys(show).map(Number).sort(function (a, b) { return a - b; }).forEach(function (i) {
+      if (i - last > 1) {
+        var gap = document.createElement("span"); gap.className = "gap"; gap.textContent = "…";
+        dots.appendChild(gap);
+      }
+      last = i;
+      var x = qs[i];
       var d = document.createElement("button");
       d.type = "button"; d.className = "dot";
       var p = progress[x.id];
