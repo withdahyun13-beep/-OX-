@@ -85,10 +85,7 @@
     });
     $("result").hidden = !pick;
     if (pick) {
-      var ok = pick === q.answer;
-      var v = $("verdict"); v.textContent = ""; v.className = "verdict " + (ok ? "good" : "bad");
-      var chip = document.createElement("span"); chip.className = "chip"; chip.textContent = ok ? "정답" : "오답";
-      v.append(chip, ok ? "딩동댕! 맞았어요" : "아쉬워요! 정답은 " + (q.answer === "O" ? "○" : "×") + " 예요");
+      var chip = $("ansChip"); chip.className = "ans-chip " + q.answer; chip.textContent = "정답 " + (q.answer === "O" ? "○" : "×");
       $("expl").textContent = q.explanation;
       $("basis").hidden = !q.basis; $("basis").textContent = q.basis || "";
     }
