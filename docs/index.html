@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>민법 OX 퀴즈</title>
+<meta name="description" content="주차별 민법 OX 문제를 풀고 바로 정답과 해설을 확인하세요.">
+<meta property="og:title" content="민법 OX 퀴즈">
+<meta property="og:description" content="주차별 민법 OX 문제 · 정답과 해설 바로 확인">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%2326407F'/%3E%3Ctext x='32' y='45' font-size='38' text-anchor='middle' fill='white' font-family='serif' font-weight='700'%3E%E6%B0%91%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="root">
+<header class="top">
+  <div class="brand">
+    <div class="seal" aria-hidden="true">民</div>
+    <div><h1>민법 OX</h1><p>주차별 OX 문제</p></div>
+  </div>
+</header>
+
+<section id="quizView" style="display:flex;flex-direction:column;gap:16px">
+  <div class="weeks" id="weekList"></div>
+  <div class="weekhead"><h2 id="weekTitle"></h2><div class="score" id="score"></div></div>
+  <div class="dots" id="dots"></div>
+  <article class="card" id="card" hidden>
+    <div class="qmeta" id="qmeta"></div>
+    <p class="qtext" id="qtext"></p>
+    <div class="ox">
+      <button type="button" class="oxbtn" id="btnO"><span class="g">○</span><span class="l">맞다</span></button>
+      <button type="button" class="oxbtn" id="btnX"><span class="g">×</span><span class="l">틀리다</span></button>
+    </div>
+    <div class="result" id="result" hidden>
+      <div class="verdict" id="verdict"></div>
+      <div class="expl">
+        <h3>해설</h3>
+        <p id="expl"></p>
+        <p class="basis" id="basis" hidden></p>
+      </div>
+    </div>
+    <div class="nav">
+      <button type="button" class="btn" id="prev">이전</button>
+      <button type="button" class="btn ghost" id="retry">이 주차 다시 풀기</button>
+      <button type="button" class="btn primary" id="next">다음 문제</button>
+    </div>
+  </article>
+  <p class="empty" id="empty">문제를 불러오는 중…</p>
+  <p class="hint">키보드: <kbd>O</kbd> <kbd>X</kbd> 로 답하고 <kbd>←</kbd> <kbd>→</kbd> 로 이동</p>
+</section>
+</div>
+<script src="quiz.js"></script>
+</body>
+</html>
