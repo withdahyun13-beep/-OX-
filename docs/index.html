@@ -16,13 +16,21 @@
 <body>
 <div id="root">
 <header class="top">
-  <div class="brand">
-    <div><h1>민법 <span class="o">O</span><span class="x">X</span></h1></div>
-  </div>
+  <a class="brand" href="#">
+    <div><h1>민법 <span class="o">O</span><span class="x">X</span></h1><p class="tagline">🤍정민 수민 다현 성근 유찬 화이팅🤍</p></div>
+  </a>
 </header>
 
-<section id="quizView" style="display:flex;flex-direction:column;gap:16px">
-  <div class="weeks" id="weekList"></div>
+<section id="homeView" class="home">
+  <h2 class="home-title">주차를 골라 주세요</h2>
+  <div class="wgrid" id="weekGrid"><p class="empty" id="homeEmpty">문제를 불러오는 중…</p></div>
+</section>
+
+<section id="quizView" hidden>
+  <div class="quiztop">
+    <a class="btn back" href="#">← 주차 선택</a>
+    <div class="weeks" id="weekList"></div>
+  </div>
   <div class="weekhead"><h2 id="weekTitle"></h2><div class="score" id="score"></div></div>
   <div class="dots" id="dots"></div>
   <article class="card" id="card" hidden>
@@ -45,7 +53,7 @@
       <button type="button" class="btn primary" id="next">다음 문제</button>
     </div>
   </article>
-  <p class="empty" id="empty">문제를 불러오는 중…</p>
+  <p class="empty" id="empty" hidden>아직 등록된 문제가 없어요.</p>
   <p class="hint">키보드: <kbd>O</kbd> <kbd>X</kbd> 로 답하고 <kbd>←</kbd> <kbd>→</kbd> 로 이동</p>
 </section>
 </div>

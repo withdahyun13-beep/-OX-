@@ -21,25 +21,62 @@
     return 0;
   }
 
+  function color(w) { return "c" + (weeks().indexOf(w) % 6); }
+  function stats(w) {
+    var qs = qsOf(w), solved = 0, right = 0;
+    qs.forEach(function (x) { if (progress[x.id]) { solved++; if (progress[x.id] === x.answer) right++; } });
+    return { total: qs.length, solved: solved, right: right };
+  }
+
+  // "#w2" opens week 2; anything else shows the week list
+  function route() {
+    var m = location.hash.match(/^#w(\d+)$/);
+    var w = m ? parseInt(m[1], 10) : null;
+    if (w !== null && weeks().indexOf(w) >= 0) {
+      if (state.week !== w) { state.week = w; state.idx = firstUnsolved(w); }
+      $("homeView").hidden = true; $("quizView").hidden = false;
+      render();
+    } else {
+      state.week = null;
+      $("quizView").hidden = true; $("homeView").hidden = false;
+      renderHome();
+    }
+    window.scrollTo(0, 0);
+  }
+
+  function renderHome() {
+    var grid = $("weekGrid"); grid.textContent = "";
+    var ws = weeks();
+    if (!ws.length) {
+      var e = document.createElement("p"); e.className = "empty"; e.textContent = "아직 등록된 문제가 없어요.";
+      grid.appendChild(e); return;
+    }
+    ws.forEach(function (w) {
+      var st = stats(w);
+      var a = document.createElement("a");
+      a.className = "wcard " + color(w); a.href = "#w" + w;
+      var t = document.createElement("b"); t.textContent = weekLabel(w);
+      var info = document.createElement("span");
+      info.textContent = st.solved ? st.solved + " / " + st.total + "문제 풀었어요" : st.total + "문제";
+      var bar = document.createElement("div"); bar.className = "bar";
+      var fill = document.createElement("i"); fill.style.width = Math.round(st.solved / st.total * 100) + "%";
+      bar.appendChild(fill);
+      a.append(t, info, bar);
+      grid.appendChild(a);
+    });
+  }
+
   function render() {
     var ws = weeks();
     var list = $("weekList");
     list.textContent = "";
-    if (!ws.length) {
-      $("card").hidden = true; $("empty").hidden = false;
-      $("empty").textContent = "아직 등록된 문제가 없어요.";
-      return;
-    }
-    if (ws.indexOf(state.week) < 0) { state.week = ws[0]; state.idx = firstUnsolved(ws[0]); }
     ws.forEach(function (w) {
-      var qs = qsOf(w);
-      var done = qs.filter(function (q) { return progress[q.id]; }).length;
-      var b = document.createElement("button");
-      b.type = "button"; b.className = "wk" + (w === state.week ? " on" : "");
+      var st = stats(w);
+      var b = document.createElement("a");
+      b.className = "wk " + color(w) + (w === state.week ? " on" : ""); b.href = "#w" + w;
       var t = document.createElement("b"); t.textContent = weekLabel(w);
-      var s = document.createElement("small"); s.textContent = done + " / " + qs.length;
+      var s = document.createElement("small"); s.textContent = st.solved + " / " + st.total;
       b.append(t, s);
-      b.onclick = function () { state.week = w; state.idx = firstUnsolved(w); render(); };
       list.appendChild(b);
     });
 
@@ -114,7 +151,7 @@
     if (n >= qs.length) {
       var nw = ws[ws.indexOf(state.week) + 1];
       if (nw === undefined) return;
-      state.week = nw; state.idx = firstUnsolved(nw);
+      location.hash = "w" + nw; return;
     } else state.idx = n;
     render();
   }
@@ -127,7 +164,7 @@
     saveProgress(); state.idx = 0; render();
   };
   document.addEventListener("keydown", function (e) {
-    if (e.metaKey || e.ctrlKey || e.altKey || !data.questions.length) return;
+    if (e.metaKey || e.ctrlKey || e.altKey || state.week === null) return;
     var k = e.key.toLowerCase();
     if (k === "o") answer("O");
     else if (k === "x") answer("X");
@@ -137,6 +174,7 @@
 
   fetch("questions.json?t=" + Date.now(), { cache: "no-store" })
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(function (d) { data = d; data.weekTitles = data.weekTitles || {}; render(); })
-    .catch(function () { $("empty").textContent = "문제를 불러오지 못했어요. 잠시 후 새로고침해 주세요."; });
+    .then(function (d) { data = d; data.questions = data.questions || []; route(); })
+    .catch(function () { $("homeView").hidden = false; $("homeEmpty").textContent = "문제를 불러오지 못했어요. 잠시 후 새로고침해 주세요."; });
+  window.addEventListener("hashchange", route);
 })();

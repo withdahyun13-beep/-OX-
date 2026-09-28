@@ -200,3 +200,36 @@ details.help ol{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:col
 .ans-chip.O{background:var(--good-mid);color:var(--good-deep)}
 .ans-chip.X{background:var(--bad-mid);color:var(--bad-deep)}
 .brand h1{font-size:26px}
+
+/* per-week pastel colors */
+.c0{--c-bg:#E3F7F1;--c-bd:#C4EEE2;--c-ink:#1E8C75}
+.c1{--c-bg:#FDECF0;--c-bd:#FAD2DC;--c-ink:#C94468}
+.c2{--c-bg:#E9EBFF;--c-bd:#D5DAFF;--c-ink:#3C47B5}
+.c3{--c-bg:#FFEFE3;--c-bd:#FFD9BF;--c-ink:#B25A1E}
+.c4{--c-bg:#E3F2FD;--c-bd:#C3E2F8;--c-ink:#2A6FA8}
+.c5{--c-bg:#FFF8DC;--c-bd:#F7E6A0;--c-ink:#86680C}
+.wk[class*=" c"]{background:var(--surface);border-color:var(--c-bd);color:var(--c-ink)}
+.wk[class*=" c"].on{background:var(--c-bg);border-color:var(--c-ink)}
+
+/* home */
+.tagline{margin:4px 0 0!important;font-size:12.5px!important;color:var(--muted)}
+#quizView:not([hidden]){display:flex;flex-direction:column;gap:16px}
+.home{display:flex;flex-direction:column;gap:14px}
+.home-title{margin:0;font-size:17px;font-weight:700;color:var(--muted)}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.wcard{
+  display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;
+  background:var(--c-bg);border:2px solid var(--c-bd);color:var(--c-ink);
+  border-radius:22px;padding:18px;text-decoration:none;transition:transform .15s,border-color .15s;
+}
+.wcard:hover{transform:translateY(-3px);border-color:var(--c-ink)}
+.wcard b{font-size:22px;font-weight:700}
+.wcard span{font-size:13.5px;color:var(--ink);opacity:.75;font-variant-numeric:tabular-nums}
+.wcard .bar{align-self:stretch;height:6px;border-radius:99px;background:var(--surface);overflow:hidden;margin-top:4px}
+.wcard .bar i{display:block;height:100%;background:var(--c-ink);opacity:.55;border-radius:99px}
+.wgrid .empty{grid-column:1/-1}
+.quiztop{display:flex;align-items:center;gap:8px}
+.quiztop .weeks{flex:1;min-width:0}
+.btn.back{flex:0 0 auto;padding:6px 14px;font-size:14px}
+.wk{text-decoration:none;color:var(--ink)}
+.brand:hover h1{opacity:.85}
