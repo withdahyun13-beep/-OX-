@@ -233,3 +233,17 @@ details.help ol{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:col
 .btn.back{flex:0 0 auto;padding:6px 14px;font-size:14px}
 .wk{text-decoration:none;color:var(--ink)}
 .brand:hover h1{opacity:.85}
+
+/* study link */
+.studylink{
+  display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink);
+  background:var(--soft);border:2px solid var(--line);border-radius:22px;padding:16px 18px;
+  transition:transform .15s,border-color .15s;
+}
+.studylink:hover{transform:translateY(-2px);border-color:var(--accent-mid)}
+.sl-icon{font-size:26px;line-height:1}
+.sl-text{flex:1;display:flex;flex-direction:column;line-height:1.35}
+.sl-text b{font-size:17px}
+.sl-text small{font-size:13px;color:var(--muted)}
+.sl-arrow{font-size:18px;color:var(--accent-deep)}
+.home-title{margin-top:10px!important;color:var(--ink)!important}
