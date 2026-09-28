@@ -15,7 +15,6 @@
   }
   function qsOf(w) { return data.questions.filter(function (q) { return q.week === w; }); }
   function weekLabel(w) { return w + "주차"; }
-  function weekTitle(w) { return (data.weekTitles && data.weekTitles[w]) || ""; }
   function firstUnsolved(w) {
     var qs = qsOf(w);
     for (var i = 0; i < qs.length; i++) if (!progress[qs[i].id]) return i;
@@ -49,8 +48,7 @@
     var q = qs[state.idx];
     $("card").hidden = false; $("empty").hidden = true;
 
-    var title = weekTitle(state.week);
-    $("weekTitle").textContent = weekLabel(state.week) + (title ? " · " + title : "");
+    $("weekTitle").textContent = weekLabel(state.week);
     var solved = 0, right = 0;
     qs.forEach(function (x) { if (progress[x.id]) { solved++; if (progress[x.id] === x.answer) right++; } });
     var sc = $("score"); sc.textContent = "맞힌 문제 ";

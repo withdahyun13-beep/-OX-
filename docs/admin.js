@@ -98,7 +98,6 @@
     return Object.keys(set).map(Number).sort(function (a, b) { return a - b; });
   }
   function qsOf(w) { return data.questions.filter(function (q) { return q.week === w; }); }
-  function weekTitle(w) { return (data.weekTitles && data.weekTitles[w]) || ""; }
 
   function render() {
     $("count").textContent = "총 " + data.questions.length + "문제";
@@ -111,7 +110,7 @@
     ws.forEach(function (w) {
       var g = document.createElement("div"); g.className = "group";
       var h = document.createElement("h3");
-      h.textContent = w + "주차" + (weekTitle(w) ? " · " + weekTitle(w) : "");
+      h.textContent = w + "주차";
       g.appendChild(h);
       qsOf(w).forEach(function (q) {
         var it = document.createElement("div");
@@ -146,7 +145,6 @@
     var w = keepWeek || (weeks().slice(-1)[0] || 1);
     editing = null;
     $("fWeek").value = w;
-    $("fWeekTitle").value = weekTitle(w);
     $("fText").value = ""; $("fExpl").value = ""; $("fBasis").value = "";
     $("fAnsO").checked = true;
     $("formTitle").textContent = "새 문제 입력";
@@ -158,7 +156,7 @@
     var q = data.questions.filter(function (x) { return x.id === id; })[0];
     if (!q) return;
     editing = id;
-    $("fWeek").value = q.week; $("fWeekTitle").value = weekTitle(q.week);
+    $("fWeek").value = q.week;
     $("fText").value = q.text; $("fExpl").value = q.explanation; $("fBasis").value = q.basis || "";
     $("fAns" + q.answer).checked = true;
     $("formTitle").textContent = "문제 수정";
@@ -168,10 +166,6 @@
     render();
     $("qform").scrollIntoView({ behavior: "smooth", block: "start" });
   }
-  $("fWeek").addEventListener("change", function () {
-    var w = parseInt($("fWeek").value, 10);
-    if (w && weekTitle(w)) $("fWeekTitle").value = weekTitle(w);
-  });
   $("fCancel").onclick = function () { resetForm(); render(); };
   $("qform").addEventListener("submit", function (e) {
     e.preventDefault();
@@ -188,8 +182,6 @@
     };
     if (editing) data.questions = data.questions.map(function (x) { return x.id === q.id ? q : x; });
     else data.questions.push(q);
-    var wt = $("fWeekTitle").value.trim();
-    if (wt) data.weekTitles[w] = wt; else delete data.weekTitles[w];
     resetForm(w);
     markDirty();
   });
