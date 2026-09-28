@@ -247,3 +247,21 @@ details.help ol{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:col
 .sl-text small{font-size:13px;color:var(--muted)}
 .sl-arrow{font-size:18px;color:var(--accent-deep)}
 .home-title{margin-top:10px!important;color:var(--ink)!important}
+
+/* fuller home screen */
+.at-home .top{
+  background:linear-gradient(135deg,#E9EBFF 0%,#FDECF0 55%,#E3F7F1 100%);
+  border-radius:28px;padding:30px 24px 26px;
+}
+.at-home .brand h1{font-size:32px}
+.at-home .tagline{font-size:13.5px!important;margin-top:8px!important;color:var(--ink);opacity:.7}
+.wgrid{grid-template-columns:1fr}
+.wcard{
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px 12px;
+  padding:20px 22px;border-radius:22px;
+}
+.wc-main{display:flex;flex-direction:column;gap:2px;min-width:0}
+.wcard b{font-size:24px}
+.wc-go{font-size:14.5px;font-weight:700;color:var(--c-ink);background:var(--surface);border-radius:999px;padding:6px 14px;white-space:nowrap}
+.wcard .bar{grid-column:1/-1;height:7px;margin-top:8px}
+@media (min-width:640px){.wgrid{grid-template-columns:1fr 1fr}}

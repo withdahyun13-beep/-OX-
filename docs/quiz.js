@@ -35,10 +35,12 @@
     if (w !== null && weeks().indexOf(w) >= 0) {
       if (state.week !== w) { state.week = w; state.idx = firstUnsolved(w); }
       $("homeView").hidden = true; $("quizView").hidden = false;
+      document.body.classList.remove("at-home");
       render();
     } else {
       state.week = null;
       $("quizView").hidden = true; $("homeView").hidden = false;
+      document.body.classList.add("at-home");
       renderHome();
     }
     window.scrollTo(0, 0);
@@ -55,13 +57,17 @@
       var st = stats(w);
       var a = document.createElement("a");
       a.className = "wcard " + color(w); a.href = "#w" + w;
+      var main = document.createElement("div"); main.className = "wc-main";
       var t = document.createElement("b"); t.textContent = weekLabel(w);
       var info = document.createElement("span");
-      info.textContent = st.solved ? st.solved + " / " + st.total + "문제 풀었어요" : st.total + "문제";
+      info.textContent = st.total + "문제" + (st.solved ? " · " + st.solved + "문제 풀었어요 · 맞힌 문제 " + st.right : "");
+      main.append(t, info);
+      var go = document.createElement("div"); go.className = "wc-go";
+      go.textContent = !st.solved ? "시작하기 →" : st.solved < st.total ? "이어 풀기 →" : "다 풀었어요 ✓";
       var bar = document.createElement("div"); bar.className = "bar";
       var fill = document.createElement("i"); fill.style.width = Math.round(st.solved / st.total * 100) + "%";
       bar.appendChild(fill);
-      a.append(t, info, bar);
+      a.append(main, go, bar);
       grid.appendChild(a);
     });
   }
