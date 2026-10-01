@@ -82,7 +82,7 @@
     $("authNote").className = "note" + (err ? " msg err" : "");
     $("authNote").textContent = err || pending ||
       "문제를 사이트에 저장하려면 이 저장소에 쓸 수 있는 GitHub 토큰이 필요해요. 한 번 입력하면 이 브라우저에 기억돼요.";
-    if (ok) $("authNote").textContent = "연결됐어요. 문제를 추가·수정한 뒤 아래 '사이트에 저장'을 누르면 1~2분 안에 사이트에 반영돼요.";
+    if (ok) $("authNote").textContent = "연결됐어요. 문제를 추가·수정한 뒤 아래 '사이트에 저장'을 누르면 최대 5분 안에 사이트에 반영돼요.";
   }
   $("connect").onclick = function () {
     var t = $("token").value.trim();
@@ -218,7 +218,7 @@
     }).then(function (res) {
       fileSha = res.content.sha;
       saved = clone(data); dirty = false; render();
-      showMsg("저장했어요. 1~2분 뒤 사이트를 새로고침하면 반영돼 있어요.");
+      showMsg("저장했어요. 최대 5분 뒤 사이트를 새로고침하면 반영돼 있어요.");
     }, function (e) {
       if (e.status === 409) showMsg("다른 곳에서 먼저 저장된 내용이 있어요. 페이지를 새로고침한 뒤 다시 입력해 주세요.", true);
       else if (e.status === 401) showMsg("토큰이 만료됐어요. 위에서 다시 연결해 주세요.", true);

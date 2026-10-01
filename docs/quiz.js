@@ -178,8 +178,14 @@
     else if (e.key === "ArrowLeft") go(-1);
   });
 
-  fetch("questions.json?t=" + Date.now(), { cache: "no-store" })
-    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+  // Questions are read straight from GitHub so new ones show up without redeploying
+  // the site (GitHub caches for up to 5 minutes); the copy next to the page is the fallback.
+  var RAW = "https://raw.githubusercontent.com/withdahyun13-beep/-OX-/claude/civil-law-ox-quiz-site-5vofqz/docs/questions.json";
+  function getJSON(url) {
+    return fetch(url, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  getJSON(RAW + "?t=" + Date.now())
+    .catch(function () { return getJSON("questions.json?t=" + Date.now()); })
     .then(function (d) { data = d; data.questions = data.questions || []; route(); })
     .catch(function () { $("homeView").hidden = false; $("homeEmpty").textContent = "문제를 불러오지 못했어요. 잠시 후 새로고침해 주세요."; });
   window.addEventListener("hashchange", route);
