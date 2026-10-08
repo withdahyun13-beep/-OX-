@@ -1,0 +1,8 @@
+// Cloudflare Workers: serve the static quiz site in docs/ as-is.
+{
+  "name": "minbeop4-oxquiz",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./docs"
+  }
+}
