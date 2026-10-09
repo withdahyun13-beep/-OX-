@@ -1,7 +1,9 @@
 (function () {
   "use strict";
   var data = { weekTitles: {}, questions: [] };
-  var state = { week: null, idx: 0 };
+  // mode "week": one week's questions; mode "wrong": every question answered wrong so far.
+  // In "wrong" mode, answers for this round live in state.review so each one can be retried.
+  var state = { mode: "week", week: null, idx: 0, wrong: [], review: {} };
   var progress = {};
 
   function $(id) { return document.getElementById(id); }
@@ -28,17 +30,29 @@
     return { total: qs.length, solved: solved, right: right };
   }
 
-  // "#w2" opens week 2; anything else shows the week list
+  function wrongQuestions() {
+    return data.questions.filter(function (q) { return progress[q.id] && progress[q.id] !== q.answer; });
+  }
+  function list() { return state.mode === "wrong" ? state.wrong : qsOf(state.week); }
+  function pickOf(q) { return state.mode === "wrong" ? state.review[q.id] : progress[q.id]; }
+  function showQuiz() {
+    $("homeView").hidden = true; $("quizView").hidden = false;
+    document.body.classList.remove("at-home");
+    render();
+  }
+
+  // "#w2" opens week 2, "#wrong" opens the wrong-answer review; anything else shows the week list
   function route() {
     var m = location.hash.match(/^#w(\d+)$/);
     var w = m ? parseInt(m[1], 10) : null;
-    if (w !== null && weeks().indexOf(w) >= 0) {
-      if (state.week !== w) { state.week = w; state.idx = firstUnsolved(w); }
-      $("homeView").hidden = true; $("quizView").hidden = false;
-      document.body.classList.remove("at-home");
-      render();
+    if (location.hash === "#wrong") {
+      if (state.mode !== "wrong") { state.mode = "wrong"; state.week = null; state.wrong = wrongQuestions(); state.review = {}; state.idx = 0; }
+      showQuiz();
+    } else if (w !== null && weeks().indexOf(w) >= 0) {
+      if (state.mode !== "week" || state.week !== w) { state.mode = "week"; state.week = w; state.idx = firstUnsolved(w); }
+      showQuiz();
     } else {
-      state.week = null;
+      state.mode = "week"; state.week = null;
       $("quizView").hidden = true; $("homeView").hidden = false;
       document.body.classList.add("at-home");
       renderHome();
@@ -70,30 +84,49 @@
       a.append(main, go, bar);
       grid.appendChild(a);
     });
+
+    var nWrong = wrongQuestions().length;
+    var box = $("wrongBox"); box.textContent = "";
+    var r = document.createElement("a");
+    r.className = "wcard wrongcard" + (nWrong ? "" : " none"); r.href = "#wrong";
+    var rm = document.createElement("div"); rm.className = "wc-main";
+    var rt = document.createElement("b"); rt.textContent = "틀린 문제 다시 풀기";
+    var ri = document.createElement("span");
+    ri.textContent = nWrong ? "전체 주차에서 틀린 " + nWrong + "문제" : "아직 틀린 문제가 없어요";
+    rm.append(rt, ri);
+    var rg = document.createElement("div"); rg.className = "wc-go"; rg.textContent = nWrong ? "다시 풀기 →" : "✓";
+    r.append(rm, rg);
+    box.appendChild(r);
   }
 
   function render() {
     var ws = weeks();
-    var list = $("weekList");
-    list.textContent = "";
+    var tabs = $("weekList");
+    tabs.textContent = "";
     ws.forEach(function (w) {
       var st = stats(w);
       var b = document.createElement("a");
-      b.className = "wk " + color(w) + (w === state.week ? " on" : ""); b.href = "#w" + w;
+      b.className = "wk " + color(w) + (state.mode === "week" && w === state.week ? " on" : ""); b.href = "#w" + w;
       var t = document.createElement("b"); t.textContent = weekLabel(w);
       var s = document.createElement("small"); s.textContent = st.solved + " / " + st.total;
       b.append(t, s);
-      list.appendChild(b);
+      tabs.appendChild(b);
     });
 
-    var qs = qsOf(state.week);
+    var wrongMode = state.mode === "wrong";
+    var qs = list();
+    $("weekTitle").textContent = wrongMode ? "틀린 문제 다시 풀기" : weekLabel(state.week);
+    if (!qs.length) {
+      $("card").hidden = true; $("empty").hidden = false; $("dots").textContent = ""; $("score").textContent = "";
+      $("empty").textContent = wrongMode ? "틀린 문제가 없어요. 주차별 문제를 먼저 풀어 보세요." : "아직 등록된 문제가 없어요.";
+      return;
+    }
     if (state.idx >= qs.length) state.idx = qs.length - 1;
     var q = qs[state.idx];
     $("card").hidden = false; $("empty").hidden = true;
 
-    $("weekTitle").textContent = weekLabel(state.week);
     var solved = 0, right = 0;
-    qs.forEach(function (x) { if (progress[x.id]) { solved++; if (progress[x.id] === x.answer) right++; } });
+    qs.forEach(function (x) { var p = pickOf(x); if (p) { solved++; if (p === x.answer) right++; } });
     var sc = $("score"); sc.textContent = "맞힌 문제 ";
     var bb = document.createElement("b"); bb.textContent = right + " / " + solved; sc.append(bb);
     sc.append(" · 전체 " + qs.length + "문제");
@@ -110,7 +143,7 @@
       var x = qs[i];
       var d = document.createElement("button");
       d.type = "button"; d.className = "dot";
-      var p = progress[x.id];
+      var p = pickOf(x);
       if (p) d.className += p === x.answer ? " right" : " wrong";
       if (i === state.idx) d.className += " cur";
       d.textContent = i + 1;
@@ -119,9 +152,9 @@
       dots.appendChild(d);
     });
 
-    $("qmeta").textContent = "문제 " + (state.idx + 1) + " / " + qs.length;
+    $("qmeta").textContent = (wrongMode ? weekLabel(q.week) + " · " : "") + "문제 " + (state.idx + 1) + " / " + qs.length;
     $("qtext").textContent = q.text;
-    var pick = progress[q.id];
+    var pick = pickOf(q);
     ["O", "X"].forEach(function (v) {
       var btn = $("btn" + v);
       btn.className = "oxbtn";
@@ -140,21 +173,25 @@
     }
     $("prev").disabled = state.idx === 0;
     var last = state.idx === qs.length - 1;
-    var nextWeek = ws[ws.indexOf(state.week) + 1];
+    var nextWeek = wrongMode ? undefined : ws[ws.indexOf(state.week) + 1];
     $("next").hidden = last && nextWeek === undefined;
+    $("retry").textContent = wrongMode ? "처음부터 다시 풀기" : "이 주차 다시 풀기";
     $("next").textContent = last ? weekLabel(nextWeek) + "로" : "다음 문제";
   }
 
   function answer(v) {
-    var q = qsOf(state.week)[state.idx];
-    if (!q || progress[q.id]) return;
+    var q = list()[state.idx];
+    if (!q || pickOf(q)) return;
+    // in review mode the new answer also replaces the saved one, so a fixed mistake leaves the wrong list
+    if (state.mode === "wrong") state.review[q.id] = v;
     progress[q.id] = v; saveProgress(); render();
   }
   function go(delta) {
-    var qs = qsOf(state.week), ws = weeks();
+    var qs = list(), ws = weeks();
     var n = state.idx + delta;
     if (n < 0) return;
     if (n >= qs.length) {
+      if (state.mode === "wrong") return;
       var nw = ws[ws.indexOf(state.week) + 1];
       if (nw === undefined) return;
       location.hash = "w" + nw; return;
@@ -166,11 +203,12 @@
   $("prev").onclick = function () { go(-1); };
   $("next").onclick = function () { go(1); };
   $("retry").onclick = function () {
+    if (state.mode === "wrong") { state.review = {}; state.idx = 0; render(); return; }
     qsOf(state.week).forEach(function (q) { delete progress[q.id]; });
     saveProgress(); state.idx = 0; render();
   };
   document.addEventListener("keydown", function (e) {
-    if (e.metaKey || e.ctrlKey || e.altKey || state.week === null) return;
+    if (e.metaKey || e.ctrlKey || e.altKey || $("quizView").hidden) return;
     var k = e.key.toLowerCase();
     if (k === "o") answer("O");
     else if (k === "x") answer("X");

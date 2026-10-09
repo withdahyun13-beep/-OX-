@@ -265,3 +265,8 @@ details.help ol{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:col
 .wc-go{font-size:14.5px;font-weight:700;color:var(--c-ink);background:var(--surface);border-radius:999px;padding:6px 14px;white-space:nowrap}
 .wcard .bar{grid-column:1/-1;height:7px;margin-top:8px}
 @media (min-width:640px){.wgrid{grid-template-columns:1fr 1fr}}
+
+/* wrong-answer review */
+.wrongcard{--c-bg:#F6F7FB;--c-bd:#E6E8F0;--c-ink:#C94468;margin-top:6px}
+.wrongcard b{font-size:20px}
+.wrongcard.none{--c-ink:#7A7F9A}
