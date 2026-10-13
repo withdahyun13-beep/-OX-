@@ -216,15 +216,26 @@
     else if (e.key === "ArrowLeft") go(-1);
   });
 
-  // Questions are read straight from GitHub so new ones show up without redeploying
-  // the site (GitHub caches for up to 5 minutes); the copy next to the page is the fallback.
+  // Questions come from two places: the copy deployed with the site, and GitHub directly
+  // (so a save from the admin page shows up before the next deploy). GitHub's file cache
+  // can lag, so load both and keep whichever was saved most recently.
   var RAW = "https://raw.githubusercontent.com/withdahyun13-beep/-OX-/claude/civil-law-ox-quiz-site-5vofqz/docs/questions.json";
   function getJSON(url) {
-    return fetch(url, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+    return fetch(url, { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .catch(function () { return null; });
   }
-  getJSON(RAW + "?t=" + Date.now())
-    .catch(function () { return getJSON("questions.json?t=" + Date.now()); })
-    .then(function (d) { data = d; data.questions = data.questions || []; route(); })
-    .catch(function () { $("homeView").hidden = false; $("homeEmpty").textContent = "문제를 불러오지 못했어요. 잠시 후 새로고침해 주세요."; });
+  function newer(a, b) {
+    if (!a) return b;
+    if (!b) return a;
+    var ta = a.updatedAt || "", tb = b.updatedAt || "";
+    if (ta !== tb) return ta > tb ? a : b;
+    return (b.questions || []).length > (a.questions || []).length ? b : a;
+  }
+  Promise.all([getJSON("questions.json?t=" + Date.now()), getJSON(RAW)]).then(function (r) {
+    var d = newer(r[0], r[1]);
+    if (!d) { $("homeView").hidden = false; $("homeEmpty").textContent = "문제를 불러오지 못했어요. 잠시 후 새로고침해 주세요."; return; }
+    data = d; data.questions = data.questions || []; route();
+  });
   window.addEventListener("hashchange", route);
 })();

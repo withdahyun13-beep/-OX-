@@ -207,6 +207,7 @@
     }
     var btn = $("publish");
     btn.disabled = true; btn.textContent = "저장 중…";
+    data.updatedAt = new Date().toISOString();
     var body = JSON.stringify(data, null, 2) + "\n";
     gh("/contents/" + FILE, {
       method: "PUT",
