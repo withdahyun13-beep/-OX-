@@ -30,10 +30,16 @@
     return { total: qs.length, solved: solved, right: right };
   }
 
-  function wrongQuestions() {
-    return data.questions.filter(function (q) { return progress[q.id] && progress[q.id] !== q.answer; });
+  // the midterm practice set lives in data.exam, separate from the weekly questions
+  function examQs() { return data.exam || []; }
+  function firstUnsolvedIn(qs) {
+    for (var i = 0; i < qs.length; i++) if (!progress[qs[i].id]) return i;
+    return 0;
   }
-  function list() { return state.mode === "wrong" ? state.wrong : qsOf(state.week); }
+  function wrongQuestions() {
+    return data.questions.concat(examQs()).filter(function (q) { return progress[q.id] && progress[q.id] !== q.answer; });
+  }
+  function list() { return state.mode === "wrong" ? state.wrong : state.mode === "exam" ? examQs() : qsOf(state.week); }
   function pickOf(q) { return state.mode === "wrong" ? state.review[q.id] : progress[q.id]; }
   function showQuiz() {
     $("homeView").hidden = true; $("quizView").hidden = false;
@@ -41,12 +47,16 @@
     render();
   }
 
-  // "#w2" opens week 2, "#wrong" opens the wrong-answer review; anything else shows the week list
+  // "#w2" opens week 2, "#exam" the midterm practice set, "#wrong" the wrong-answer review;
+  // anything else shows the week list
   function route() {
     var m = location.hash.match(/^#w(\d+)$/);
     var w = m ? parseInt(m[1], 10) : null;
     if (location.hash === "#wrong") {
       if (state.mode !== "wrong") { state.mode = "wrong"; state.week = null; state.wrong = wrongQuestions(); state.review = {}; state.idx = 0; }
+      showQuiz();
+    } else if (location.hash === "#exam" && examQs().length) {
+      if (state.mode !== "exam") { state.mode = "exam"; state.week = null; state.idx = firstUnsolvedIn(examQs()); }
       showQuiz();
     } else if (w !== null && weeks().indexOf(w) >= 0) {
       if (state.mode !== "week" || state.week !== w) { state.mode = "week"; state.week = w; state.idx = firstUnsolved(w); }
@@ -85,6 +95,25 @@
       grid.appendChild(a);
     });
 
+    var ex = examQs(), eBox = $("examBox"); eBox.textContent = "";
+    if (ex.length) {
+      var eSolved = 0, eRight = 0;
+      ex.forEach(function (x) { if (progress[x.id]) { eSolved++; if (progress[x.id] === x.answer) eRight++; } });
+      var c = document.createElement("a"); c.className = "wcard examcard"; c.href = "#exam";
+      var cm = document.createElement("div"); cm.className = "wc-main";
+      var ct = document.createElement("b"); ct.textContent = "중간고사 대비 실전 연습";
+      var ci = document.createElement("span");
+      ci.textContent = "1~11강 전 범위 · " + ex.length + "문항" + (eSolved ? " · " + eSolved + "문항 풀었어요 · 맞힌 문제 " + eRight : "");
+      cm.append(ct, ci);
+      var cg = document.createElement("div"); cg.className = "wc-go";
+      cg.textContent = !eSolved ? "시작하기 →" : eSolved < ex.length ? "이어 풀기 →" : "다 풀었어요 ✓";
+      var cb = document.createElement("div"); cb.className = "bar";
+      var cf = document.createElement("i"); cf.style.width = Math.round(eSolved / ex.length * 100) + "%";
+      cb.appendChild(cf);
+      c.append(cm, cg, cb);
+      eBox.appendChild(c);
+    }
+
     var nWrong = wrongQuestions().length;
     var box = $("wrongBox"); box.textContent = "";
     var r = document.createElement("a");
@@ -92,7 +121,7 @@
     var rm = document.createElement("div"); rm.className = "wc-main";
     var rt = document.createElement("b"); rt.textContent = "틀린 문제 다시 풀기";
     var ri = document.createElement("span");
-    ri.textContent = nWrong ? "전체 주차에서 틀린 " + nWrong + "문제" : "아직 틀린 문제가 없어요";
+    ri.textContent = nWrong ? "전체에서 틀린 " + nWrong + "문제" : "아직 틀린 문제가 없어요";
     rm.append(rt, ri);
     var rg = document.createElement("div"); rg.className = "wc-go"; rg.textContent = nWrong ? "다시 풀기 →" : "✓";
     r.append(rm, rg);
@@ -113,9 +142,9 @@
       tabs.appendChild(b);
     });
 
-    var wrongMode = state.mode === "wrong";
+    var wrongMode = state.mode === "wrong", examMode = state.mode === "exam";
     var qs = list();
-    $("weekTitle").textContent = wrongMode ? "틀린 문제 다시 풀기" : weekLabel(state.week);
+    $("weekTitle").textContent = wrongMode ? "틀린 문제 다시 풀기" : examMode ? "중간고사 대비 실전 연습" : weekLabel(state.week);
     if (!qs.length) {
       $("card").hidden = true; $("empty").hidden = false; $("dots").textContent = ""; $("score").textContent = "";
       $("empty").textContent = wrongMode ? "틀린 문제가 없어요. 주차별 문제를 먼저 풀어 보세요." : "아직 등록된 문제가 없어요.";
@@ -152,7 +181,7 @@
       dots.appendChild(d);
     });
 
-    $("qmeta").textContent = (wrongMode ? weekLabel(q.week) + " · " : "") + "문제 " + (state.idx + 1) + " / " + qs.length;
+    $("qmeta").textContent = (wrongMode ? (q.exam ? "실전 연습" : weekLabel(q.week)) + " · " : "") + "문제 " + (state.idx + 1) + " / " + qs.length;
     $("qtext").textContent = q.text;
     var pick = pickOf(q);
     ["O", "X"].forEach(function (v) {
@@ -173,9 +202,9 @@
     }
     $("prev").disabled = state.idx === 0;
     var last = state.idx === qs.length - 1;
-    var nextWeek = wrongMode ? undefined : ws[ws.indexOf(state.week) + 1];
+    var nextWeek = state.mode === "week" ? ws[ws.indexOf(state.week) + 1] : undefined;
     $("next").hidden = last && nextWeek === undefined;
-    $("retry").textContent = wrongMode ? "처음부터 다시 풀기" : "이 주차 다시 풀기";
+    $("retry").textContent = wrongMode ? "처음부터 다시 풀기" : examMode ? "전체 다시 풀기" : "이 주차 다시 풀기";
     $("next").textContent = last ? weekLabel(nextWeek) + "로" : "다음 문제";
   }
 
@@ -191,7 +220,7 @@
     var n = state.idx + delta;
     if (n < 0) return;
     if (n >= qs.length) {
-      if (state.mode === "wrong") return;
+      if (state.mode !== "week") return;
       var nw = ws[ws.indexOf(state.week) + 1];
       if (nw === undefined) return;
       location.hash = "w" + nw; return;
@@ -204,7 +233,7 @@
   $("next").onclick = function () { go(1); };
   $("retry").onclick = function () {
     if (state.mode === "wrong") { state.review = {}; state.idx = 0; render(); return; }
-    qsOf(state.week).forEach(function (q) { delete progress[q.id]; });
+    list().forEach(function (q) { delete progress[q.id]; });
     saveProgress(); state.idx = 0; render();
   };
   document.addEventListener("keydown", function (e) {
